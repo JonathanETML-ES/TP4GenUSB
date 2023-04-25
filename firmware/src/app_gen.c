@@ -54,7 +54,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app_gen.h"
-#include "app.h"
 #include "Mc32DriverLcd.h"
 #include "DefMenuGen.h"
 
@@ -181,11 +180,12 @@ void APP_GEN_Tasks ( void )
                 printf_lcd("%c", app_genData.newCar);
             }*/
             
-            
+            /*
             if(usbStat)
                 MENU_Execute(&RemoteParamGen, false);
             else
                 MENU_Execute(&LocalParamGen, true);
+            */
             break;
         }
 

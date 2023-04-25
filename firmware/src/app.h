@@ -120,10 +120,10 @@ typedef enum
     Application strings and buffers are be defined outside this structure.
  */
 
-
+/*
 //création variable de l'état de l'USB
 bool usbStat = 0;
-
+*/
 typedef struct
 {
     /* Device layer handle returned by device layer open function */

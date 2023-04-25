@@ -252,14 +252,14 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event, void * eventData, uintp
 
             /* VBUS was detected. We can attach the device */
             USB_DEVICE_Attach(appData.deviceHandle);
-            usbStat = 1;
+            //usbStat = 1;
             break;
 
         case USB_DEVICE_EVENT_POWER_REMOVED:
 
             /* VBUS is not available any more. Detach the device. */
             USB_DEVICE_Detach(appData.deviceHandle);
-            usbStat = 0;
+            //usbStat = 0;
             break;
 
         case USB_DEVICE_EVENT_SUSPENDED:
