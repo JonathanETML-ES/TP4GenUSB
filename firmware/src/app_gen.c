@@ -88,7 +88,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     
     Application strings and buffers are be defined outside this structure.
 */
-#define MagicVal 0x123AA
+#define MagicVal 0x123455AA
 
 APP_GEN_DATA app_genData;
 S_ParamGen LocalParamGen;
@@ -168,7 +168,7 @@ void APP_GEN_Tasks ( void )
             // Init I2C EEPROM
             I2C_InitMCP79411();
                     
-            LocalParamGen.Magic = MagicVal;
+            //LocalParamGen.Magic = MagicVal;
             RemoteParamGen = LocalParamGen;
             
             lcd_init();
@@ -240,28 +240,28 @@ void APP_GEN_Tasks ( void )
                   switch(RemoteParamGen.Forme)
                      {
                          case SignalCarre:
-                             printf_lcd(" Forme = Carre");  
+                             printf_lcd("#Forme = Carre");  
                              break;
 
                          case SignalDentDeScie:
-                             printf_lcd(" Forme = DentDeScie");  
+                             printf_lcd("#Forme = DentDeScie");  
                              break;
 
                          case SignalSinus:
-                             printf_lcd(" Forme = Sinus");  
+                             printf_lcd("#Forme = Sinus");  
                              break;
 
                          case SignalTriangle:
-                            printf_lcd(" Forme = Triangle");  
+                            printf_lcd("#Forme = Triangle");  
                              break;
                      }
                   
                   lcd_gotoxy(1,2);
-                  printf_lcd(" Freq [Hz] = %4d", RemoteParamGen.Frequence);  
+                  printf_lcd("#Freq [Hz] = %4d", RemoteParamGen.Frequence);  
                   lcd_gotoxy(1,3);
-                  printf_lcd(" Ampl [mV] = %5d", RemoteParamGen.Amplitude);  
+                  printf_lcd("#Ampl [mV] = %5d", RemoteParamGen.Amplitude);  
                   lcd_gotoxy(1,4);
-                  printf_lcd(" Offset [mV] = %5d", RemoteParamGen.Offset);  
+                  printf_lcd("#Offset [mV] = %5d", RemoteParamGen.Offset);  
 
                   FLAG_LCD = 0;
                 }

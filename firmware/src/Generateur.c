@@ -33,9 +33,9 @@ static float TabVal[100] = {0};
 // Initialisation du  générateur
 void  GENSIG_Initialize(S_ParamGen *pParam)
 {
-    pParam->Frequence = 1000;
+    pParam->Frequence = 100;
     pParam->Forme = SignalSinus;
-    pParam->Amplitude = 5000;
+    pParam->Amplitude = 100;
     pParam->Offset = 0;
 }
   
