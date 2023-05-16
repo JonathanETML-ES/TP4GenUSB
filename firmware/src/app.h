@@ -120,10 +120,7 @@ typedef enum
     Application strings and buffers are be defined outside this structure.
  */
 
-/*
-//création variable de l'état de l'USB
-bool usbStat = 0;
-*/
+
 typedef struct
 {
     /* Device layer handle returned by device layer open function */
@@ -262,6 +259,9 @@ void APP_Initialize ( void );
 
 void APP_Tasks ( void );
 
+extern APP_DATA appData;
+extern uint8_t usbStat;
+extern bool FLAG_LCD;
 
 #endif /* _APP_H */
 /*******************************************************************************

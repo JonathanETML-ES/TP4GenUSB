@@ -216,7 +216,8 @@ build/pic32mx_usb_sk2_int_dyn/production/_ext/1360937237/Mc32SpiUtil.o: \
  ../../../../../../framework/usb/usb_device_cdc.h \
  ../../../../../../framework/usb/src/usb_device_function_driver.h \
  ../../../../../../framework/usb/usb_cdc.h ../src/app.h ../src/app_gen.h \
- ../../../../../../bsp/pic32mx_skes/Mc32DriverLcd.h ../src/Mc32SpiUtil.h \
+ ../src/DefMenuGen.h ../../../../../../bsp/pic32mx_skes/Mc32DriverLcd.h \
+ ../src/Mc32SpiUtil.h \
  ../../../../../../framework/peripheral\SPI\plib_spi.h \
  ../../../../../../framework/peripheral/spi/processor/spi_processor.h \
  ../../../../../../framework/peripheral/spi/processor/spi_p32xxxx.h \
@@ -699,6 +700,8 @@ build/pic32mx_usb_sk2_int_dyn/production/_ext/1360937237/Mc32SpiUtil.o: \
 ../src/app.h:
 
 ../src/app_gen.h:
+
+../src/DefMenuGen.h:
 
 ../../../../../../bsp/pic32mx_skes/Mc32DriverLcd.h:
 

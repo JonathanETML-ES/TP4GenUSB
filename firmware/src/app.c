@@ -54,6 +54,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app.h"
+#include "Mc32gest_SerComm.h"
+#include "Mc32gestI2cSeeprom.h"
 
 
 // *****************************************************************************
@@ -61,10 +63,17 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: Global Data Definitions
 // *****************************************************************************
 // *****************************************************************************
-
 const uint8_t __attribute__((aligned(16))) switchPromptUSB[] = "\r\nPUSH BUTTON PRESSED";
 
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
+
+S_ParamGen LocalParamGen;
+S_ParamGen RemoteParamGen;
+
+//création variable de l'état de l'USB
+bool usbStatSave = 0;
+uint8_t usbStat = 0;
+bool FLAG_LCD = 1;
 
 // *****************************************************************************
 /* Application Data
@@ -252,14 +261,16 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event, void * eventData, uintp
 
             /* VBUS was detected. We can attach the device */
             USB_DEVICE_Attach(appData.deviceHandle);
-            //usbStat = 1;
+            usbStat = 1;
+            FLAG_LCD = 1;
             break;
 
         case USB_DEVICE_EVENT_POWER_REMOVED:
 
             /* VBUS is not available any more. Detach the device. */
             USB_DEVICE_Detach(appData.deviceHandle);
-            //usbStat = 0;
+            usbStat = 0;
+            FLAG_LCD = 1;
             break;
 
         case USB_DEVICE_EVENT_SUSPENDED:
@@ -434,7 +445,7 @@ void APP_Tasks (void )
 {
     /* Update the application state machine based
      * on the current state */
-    int i; 
+    
     switch(appData.state)
     {
         case APP_STATE_INIT:
@@ -475,13 +486,13 @@ void APP_Tasks (void )
 
             /* If a read is complete, then schedule a read
              * else wait for the current read to complete */
-
             appData.state = APP_STATE_WAIT_FOR_READ_COMPLETE;
             if(appData.isReadComplete == true)
             {
                 appData.isReadComplete = false;
                 appData.readTransferHandle =  USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
-
+                
+                
                 USB_DEVICE_CDC_Read (USB_DEVICE_CDC_INDEX_0,
                         &appData.readTransferHandle, appData.readBuffer,
                         APP_READ_BUFFER_SIZE);
@@ -492,7 +503,6 @@ void APP_Tasks (void )
                     break;
                 }
             }
-
             break;
 
         case APP_STATE_WAIT_FOR_READ_COMPLETE:
@@ -508,9 +518,16 @@ void APP_Tasks (void )
             /* Check if a character was received or a switch was pressed.
              * The isReadComplete flag gets updated in the CDC event handler. */
 
-            if(appData.isReadComplete || appData.isSwitchPressed)
+            if(appData.isReadComplete)
             {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
+                
+                // Ici, nous allons appeler notre fonction GetMessage qui va prendre la trame de l'application C#
+                FLAG_LCD = 1;
+                GetMessage(appData.readBuffer, &RemoteParamGen, &usbStatSave);
+                
+                // Si la case sauvegarde est coché
+                if(usbStatSave) I2C_Write_EEPROM(&RemoteParamGen, 16);
             }
 
             break;
@@ -524,38 +541,22 @@ void APP_Tasks (void )
             }
 
             /* Setup the write */
-
             appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
             appData.isWriteComplete = false;
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
-
-            if(appData.isSwitchPressed)
-            {
-                /* If the switch was pressed, then send the switch prompt*/
-                appData.isSwitchPressed = false;
-                USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle, switchPromptUSB, 23,
-                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            }
-            else
-            {
-                /* Else echo each received character by adding 1 */
-                for(i=0; i<appData.numBytesRead; i++)
-                {
-                    if((appData.readBuffer[i] != 0x0A) && (appData.readBuffer[i] != 0x0D))
-                    {
-                        appData.readBuffer[i] = appData.readBuffer[i] + 1;
-                    }
-                }
-                
-                APP_GEN_DisplayChar(*appData.readBuffer);
-                
-                USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle,
-                        appData.readBuffer, appData.numBytesRead,
-                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            }
-
+            
+            APP_GEN_DisplayChar(*appData.readBuffer);
+            
+            
+            // Ici, nous allons appeler notre fonction SendMessage qui va creer la trame pour l'application C#
+            FLAG_LCD = 1;
+            SendMessage(appData.readBuffer, &RemoteParamGen, usbStatSave);
+            
+            // Envoie de la trame sur notre buffeur
+            USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
+                    &appData.writeTransferHandle,
+                    appData.readBuffer, appData.numBytesRead+2,
+                    USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
             break;
 
         case APP_STATE_WAIT_FOR_WRITE_COMPLETE:
@@ -567,7 +568,6 @@ void APP_Tasks (void )
 
             /* Check if a character was sent. The isWriteComplete
              * flag gets updated in the CDC event handler */
-
             if(appData.isWriteComplete == true)
             {
                 appData.state = APP_STATE_SCHEDULE_READ;

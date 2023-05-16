@@ -25,4 +25,7 @@ typedef struct {
       uint32_t Magic;
 } S_ParamGen;
 
+extern S_ParamGen RemoteParamGen;
+extern S_ParamGen LocalParamGen;
+
 #endif

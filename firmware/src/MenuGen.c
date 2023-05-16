@@ -47,26 +47,17 @@ void MENU_Initialize(S_ParamGen *pParam)
     GENSIG_UpdateSignal(pParam);
 }
 
+
 // Execution du menu, appel cyclique depuis l'application
 void MENU_Execute(S_ParamGen *pParam, bool local)
 {
     if(local == true)
     {
-        static int32_t n = 0;
+        static int32_t n = 1;
         static int32_t x = 0;
         static int32_t y = 0;
-        //static int32_t ValSwitch = 0;
         static int32_t Etat = 1;
         static int Flag_refresh = 0;
-        //int CountButton = 0;
-        //static uint16_t CompteurAppuis = 0;
-
-        /*
-        if (S_OK == 0)
-            {
-                Etat = 5;
-            }
-         */
 
         // Lecture du PEC12 pour naviguer dans le menu
         if(flag_menu == 0)
@@ -161,7 +152,7 @@ void MENU_Execute(S_ParamGen *pParam, bool local)
 
         if(n <= 0)
         {
-            n = 0;
+            n = 1;
         }
 
 
@@ -247,31 +238,7 @@ void MENU_Execute(S_ParamGen *pParam, bool local)
                     Flag_refresh = 1;
                 }
                 break; 
-            /*
-            case 5 :
-    // Affichage specifique
-                    //lcd_ClearLine(1);
-                    lcd_gotoxy(1,2);
-                    printf_lcd("   Sauvegarde  ?  ");
-                    lcd_gotoxy(1,3);
-                    printf_lcd("   (appuis long)  ");
-                    //lcd_ClearLine(4);
-    //                //Detection du maintien pour la sauvegarde
-    //                if(S_OK == 0)
-    //                {
-    //                   CountButton ++;
-    //                }
-    //                if(CountButton >= 200)
-    //                {
-    //                    NVM_WriteBlock((uint32_t*) pParam, sizeof(S_ParamGen));
-    //                    CompteurAppuis = 0;
-    //                    lcd_gotoxy(1,3);
-    //                    printf_lcd(" Data Saved  ");
-    //
-    //                    Etat = 1;
-    //                }
-                break;
-            */    
+                
             default :
                 break;
         }
@@ -342,7 +309,7 @@ void MENU_Execute(S_ParamGen *pParam, bool local)
                  if(Pec12IsOK())
                  {
                      Pec12ClearOK();
-                     n = 1;
+                     n = 2;
                      flag_menu = 0;
                      flag_freq = 0; 
 
@@ -365,7 +332,7 @@ void MENU_Execute(S_ParamGen *pParam, bool local)
                  if(Pec12IsOK())
                  {
                      Pec12ClearOK();
-                     n = 2;
+                     n = 3;
                      flag_menu = 0;
                      flag_ampl = 0;
 
@@ -388,7 +355,7 @@ void MENU_Execute(S_ParamGen *pParam, bool local)
                  if(Pec12IsOK())
                  {
                      Pec12ClearOK();
-                     n = 3;
+                     n = 4;
                      flag_menu = 0;
                      flag_ampl = 0;
 
@@ -404,6 +371,7 @@ void MENU_Execute(S_ParamGen *pParam, bool local)
         }
       }   
     }
+    else GENSIG_UpdateSignal(pParam);
 }
 
 

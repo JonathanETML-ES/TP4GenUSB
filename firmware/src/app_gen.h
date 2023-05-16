@@ -58,6 +58,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "DefMenuGen.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -167,7 +168,9 @@ void APP_GEN_DisplayChar(char car);
 */
 
 void APP_GEN_Initialize ( void );
+void APP_UpdateState (APP_GEN_STATES NewState);
 
+//extern int FLAG_LCD;
 
 /*******************************************************************************
   Function:

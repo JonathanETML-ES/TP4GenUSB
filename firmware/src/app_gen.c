@@ -55,7 +55,18 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "app_gen.h"
 #include "Mc32DriverLcd.h"
+#include "app.h"
 #include "DefMenuGen.h"
+
+#include "Mc32gestSpiDac.h"
+#include "Generateur.h"
+#include "GesPec12.h"
+#include "MenuGen.h"
+#include "Mc32Debounce.h"
+#include "Mc32gestSpiDac.h"
+#include "Mc32NVMUtil.h"
+#include "Mc32SpiUtil.h"
+#include "Mc32gestI2cSeeprom.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -77,11 +88,15 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     
     Application strings and buffers are be defined outside this structure.
 */
+#define MagicVal 0x123AA
 
 APP_GEN_DATA app_genData;
 S_ParamGen LocalParamGen;
 S_ParamGen RemoteParamGen;
 
+
+uint8_t usbStat;
+bool FLAG_LCD;
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Functions
@@ -128,6 +143,10 @@ void APP_GEN_Initialize ( void )
      */
 }
 
+void APP_UpdateState (APP_GEN_STATES NewState)
+{
+    app_genData.state = NewState;
+}
 
 /******************************************************************************
   Function:
@@ -146,46 +165,149 @@ void APP_GEN_Tasks ( void )
         /* Application's initial state. */
         case APP_GEN_STATE_INIT:
         {
-            bool appInitialized = true;
+            // Init I2C EEPROM
+            I2C_InitMCP79411();
+                    
+            LocalParamGen.Magic = MagicVal;
             RemoteParamGen = LocalParamGen;
-       
-            lcd_init();
-            lcd_gotoxy(1,1);
-            printf_lcd("Hello");
-            lcd_bl_on();
             
-            if (appInitialized)
+            lcd_init();
+            printf_lcd("TP4 MINF");
+            lcd_gotoxy(1,2);
+            printf_lcd("Loic David");
+            lcd_gotoxy(1,3);
+            printf_lcd("Jonathan Shifteh");                    
+            lcd_bl_on();
+
+            // Init SPI DAC
+            SPI_InitLTC2604();
+                        
+            // Initialisation PEC12
+            Pec12Init();
+                
+            // Initialisation du menu
+            MENU_Initialize(&LocalParamGen);
+
+            // Initialisation du generateur
+            GENSIG_Initialize(&LocalParamGen);
+           
+            // Active les timers 
+            DRV_TMR0_Start();
+            DRV_TMR1_Start();
+            
+            
+            //I2C_Read_EEPROM(&RemoteParamGen, 16);
+            if(RemoteParamGen.Magic == MagicVal)
             {
-                app_genData.state = APP_GEN_STATE_SERVICE_TASKS;
+                lcd_gotoxy(1,4);
+                printf_lcd("Save OK");   
             }
+            else 
+            {
+                lcd_gotoxy(1,4);
+                printf_lcd("Save KO"); 
+            }
+            
+            app_genData.state = APP_GEN_STATE_WAIT;
+            
             break;
         }
         
         case APP_GEN_STATE_WAIT:
         {
+            //FLAG_LCD = 1;
             break;
         }
         
         case APP_GEN_STATE_SERVICE_TASKS:
         {
+            // Contrôle pour checker le fontionnement de l'interruption
+            BSP_LEDToggle(BSP_LED_2);
             
-            /*
-            //Nouveau car reçu ?
-            if(app_genData.newCharReceived)
+            // Execution du menu lorsque nous sommes en USB
+            if(usbStat == 1)
             {
-                app_genData.newCharReceived = false;
-                
-                //affichage
-                lcd_gotoxy(1, 4);
-                printf_lcd("%c", app_genData.newCar);
-            }*/
-            
-            /*
-            if(usbStat)
                 MENU_Execute(&RemoteParamGen, false);
+                if(FLAG_LCD == 1)
+                {
+                  lcd_ClearLine(1);
+                  lcd_ClearLine(2);
+                  lcd_ClearLine(3);
+                  lcd_ClearLine(4);
+                
+                  lcd_bl_on();
+                  lcd_gotoxy(1,1);
+                  switch(RemoteParamGen.Forme)
+                     {
+                         case SignalCarre:
+                             printf_lcd(" Forme = Carre");  
+                             break;
+
+                         case SignalDentDeScie:
+                             printf_lcd(" Forme = DentDeScie");  
+                             break;
+
+                         case SignalSinus:
+                             printf_lcd(" Forme = Sinus");  
+                             break;
+
+                         case SignalTriangle:
+                            printf_lcd(" Forme = Triangle");  
+                             break;
+                     }
+                  
+                  lcd_gotoxy(1,2);
+                  printf_lcd(" Freq [Hz] = %4d", RemoteParamGen.Frequence);  
+                  lcd_gotoxy(1,3);
+                  printf_lcd(" Ampl [mV] = %5d", RemoteParamGen.Amplitude);  
+                  lcd_gotoxy(1,4);
+                  printf_lcd(" Offset [mV] = %5d", RemoteParamGen.Offset);  
+
+                  FLAG_LCD = 0;
+                }
+            }
+            // Sinon, execution en mode normal
             else
-                MENU_Execute(&LocalParamGen, true);
-            */
+            {
+                //Initialisation de notre LCD
+                if(FLAG_LCD == 1)
+                {
+                  lcd_gotoxy(1,2);
+                  printf_lcd(" Freq [Hz] = %4d", LocalParamGen.Frequence);  
+                  lcd_gotoxy(1,3);
+                  printf_lcd(" Ampl [mV] = %5d", LocalParamGen.Amplitude);  
+                  lcd_gotoxy(1,4);
+                  printf_lcd(" Offset [mV] = %5d", LocalParamGen.Offset);  
+                  
+                  
+                  
+                  lcd_gotoxy(1,1);
+                  switch(LocalParamGen.Forme)
+                     {
+                         case SignalCarre:
+                             printf_lcd(" Forme = Carre");  
+                             break;
+
+                         case SignalDentDeScie:
+                             printf_lcd(" Forme = DentDeScie");  
+                             break;
+
+                         case SignalSinus:
+                             printf_lcd(" Forme = Sinus");  
+                             break;
+
+                         case SignalTriangle:
+                            printf_lcd(" Forme = Triangle");  
+                             break;
+                     }
+                  
+                  FLAG_LCD = 0;
+                }
+              GENSIG_UpdateSignal(&LocalParamGen);
+              MENU_Execute(&LocalParamGen, true);
+            }
+            
+            app_genData.state = APP_GEN_STATE_WAIT;
             break;
         }
 

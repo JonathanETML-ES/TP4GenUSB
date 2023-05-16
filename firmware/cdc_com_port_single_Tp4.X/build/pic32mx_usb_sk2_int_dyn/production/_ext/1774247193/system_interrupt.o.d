@@ -216,8 +216,9 @@ build/pic32mx_usb_sk2_int_dyn/production/_ext/1774247193/system_interrupt.o: \
  ../../../../../../framework/usb/usb_device_cdc.h \
  ../../../../../../framework/usb/src/usb_device_function_driver.h \
  ../../../../../../framework/usb/usb_cdc.h ../src/app_gen.h \
- ../../../../../../bsp/pic32mx_skes/Mc32DriverLcd.h \
- ../src/system_config/pic32mx_usb_sk2_int_dyn/system_definitions.h
+ ../src/DefMenuGen.h ../../../../../../bsp/pic32mx_skes/Mc32DriverLcd.h \
+ ../src/system_config/pic32mx_usb_sk2_int_dyn/system_definitions.h \
+ ../src/GesPec12.h ../src/Generateur.h
 
 ../../../../../../framework/system/common/sys_common.h:
 
@@ -655,6 +656,12 @@ build/pic32mx_usb_sk2_int_dyn/production/_ext/1774247193/system_interrupt.o: \
 
 ../src/app_gen.h:
 
+../src/DefMenuGen.h:
+
 ../../../../../../bsp/pic32mx_skes/Mc32DriverLcd.h:
 
 ../src/system_config/pic32mx_usb_sk2_int_dyn/system_definitions.h:
+
+../src/GesPec12.h:
+
+../src/Generateur.h:
